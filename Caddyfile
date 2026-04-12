@@ -20,7 +20,7 @@ chakula_api.somastories.app {
 	}
 
 	# --- Reverse proxy to chakula_api ---
-	reverse_proxy chakula_api:5000 {
+	reverse_proxy chakula_api:3000 {
 		header_up Host {host}
 		header_up X-Real-IP {remote_host}
 		header_up X-Forwarded-For {remote_host}
