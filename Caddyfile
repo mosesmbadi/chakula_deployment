@@ -3,7 +3,7 @@
 	order coraza_waf first
 }
 
-chakula_api.somastories.app {
+chakula-api.somastories.app {
 	# --- Coraza WAF (OWASP Core Rule Set) ---
 	coraza_waf {
 		load_owasp_crs
