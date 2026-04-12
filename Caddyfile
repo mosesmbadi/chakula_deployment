@@ -1,0 +1,45 @@
+{
+	# Enable Coraza WAF globally before any other handler
+	order coraza_waf first
+}
+
+chakula_api.somastories.app {
+	# --- Coraza WAF (OWASP Core Rule Set) ---
+	coraza_waf {
+		load_owasp_crs
+		directives `
+			Include @coraza.conf-recommended
+			Include @crs-setup.conf.example
+			Include @owasp_crs/*.conf
+			SecRuleEngine On
+			SecRequestBodyAccess On
+			SecResponseBodyAccess Off
+			SecAuditEngine RelevantOnly
+			SecAuditLog /var/log/caddy/coraza-audit.log
+		`
+	}
+
+	# --- Reverse proxy to chakula_api ---
+	reverse_proxy chakula_api:5000 {
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	# --- Security headers ---
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		X-XSS-Protection "1; mode=block"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	# --- Logging ---
+	log {
+		output file /var/log/caddy/chakula_api.log
+		format json
+	}
+}

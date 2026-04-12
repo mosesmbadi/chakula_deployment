@@ -1,0 +1,10 @@
+# Stage 1 — build Caddy with the Coraza WAF plugin
+FROM caddy:builder AS builder
+
+RUN xcaddy build \
+    --with github.com/corazawaf/coraza-caddy/v2
+
+# Stage 2 — final image
+FROM caddy:latest
+
+COPY --from=builder /usr/bin/caddy /usr/bin/caddy
