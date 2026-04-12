@@ -18,16 +18,10 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT || '22' }}
-          envs: ENV_FILE
           script: |
             set -euo pipefail
 
             cd ${{ secrets.DEPLOY_PATH }}
-
-            echo "→ Writing .env..."
-            cat > .env << 'ENVEOF'
-            ${{ secrets.ENV_FILE }}
-            ENVEOF
 
             echo "→ Pulling latest code..."
             git pull origin main
