@@ -17,14 +17,23 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
+          port: ${{ secrets.SSH_PORT || '22' }}
+          envs: ENV_FILE
           script: |
             set -euo pipefail
 
             cd ${{ secrets.DEPLOY_PATH }}
 
+            echo "→ Writing .env..."
+            cat > .env << 'ENVEOF'
+            ${{ secrets.ENV_FILE }}
+            ENVEOF
+
             echo "→ Pulling latest code..."
             git pull origin main
+
+            echo "→ Pulling app images from Docker Hub..."
+            docker compose pull chakula_api chakula_knowledge_base
 
             echo "→ Building Caddy image..."
             docker compose build caddy

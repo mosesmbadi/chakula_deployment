@@ -24,7 +24,7 @@ services:
 
   # ── Public API ───────────────────────────────────────────────────────────────
   chakula_api:
-    image: chakula_api:latest
+    image: mosesmbadi/chakula_api:latest
     container_name: chakula_api
     restart: unless-stopped
     environment:
@@ -43,7 +43,7 @@ services:
 
   # ── Internal knowledge base (not exposed publicly) ───────────────────────────
   chakula_knowledge_base:
-    image: chakula_knowledge_base:latest
+    image: mosesmbadi/chakula_knowledge_base:latest
     container_name: chakula_knowledge_base
     restart: unless-stopped
     environment:
