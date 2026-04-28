@@ -2,7 +2,8 @@
 FROM caddy:builder AS builder
 
 RUN xcaddy build \
-    --with github.com/corazawaf/coraza-caddy/v2
+    --with github.com/corazawaf/coraza-caddy/v2 \
+    --with github.com/mholt/caddy-ratelimit
 
 # Stage 2 — final image
 FROM caddy:latest
