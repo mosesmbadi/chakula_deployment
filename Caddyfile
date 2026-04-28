@@ -3,22 +3,17 @@
 	order rate_limit before reverse_proxy
 }
 
-chakula.app, www.chakula.app {
+(rate_limited) {
 	rate_limit {
-		zone landing {
+		zone {args[0]} {
 			key    {remote_host}
 			events 30
 			window 10s
 		}
 	}
+}
 
-	reverse_proxy chakula_landing:3000 {
-		header_up Host {host}
-		header_up X-Real-IP {remote_host}
-		header_up X-Forwarded-For {remote_host}
-		header_up X-Forwarded-Proto {scheme}
-	}
-
+(security_headers) {
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 		X-Content-Type-Options "nosniff"
@@ -27,6 +22,19 @@ chakula.app, www.chakula.app {
 		Referrer-Policy "strict-origin-when-cross-origin"
 		-Server
 	}
+}
+
+chakula.app, www.chakula.app {
+	import rate_limited landing
+
+	reverse_proxy chakula_landing:3000 {
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	import security_headers
 
 	log {
 		output file /var/log/caddy/chakula_landing.log
@@ -34,8 +42,9 @@ chakula.app, www.chakula.app {
 	}
 }
 
-chakula-api.somastories.app {
-	# --- Coraza WAF (OWASP Core Rule Set) ---
+api.chakula.app {
+	import rate_limited api
+
 	coraza_waf {
 		load_owasp_crs
 		directives `
@@ -50,7 +59,6 @@ chakula-api.somastories.app {
 		`
 	}
 
-	# --- Reverse proxy to chakula_api ---
 	reverse_proxy chakula_api:3000 {
 		header_up Host {host}
 		header_up X-Real-IP {remote_host}
@@ -58,17 +66,8 @@ chakula-api.somastories.app {
 		header_up X-Forwarded-Proto {scheme}
 	}
 
-	# --- Security headers ---
-	header {
-		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-		X-Content-Type-Options "nosniff"
-		X-Frame-Options "DENY"
-		X-XSS-Protection "1; mode=block"
-		Referrer-Policy "strict-origin-when-cross-origin"
-		-Server
-	}
+	import security_headers
 
-	# --- Logging ---
 	log {
 		output file /var/log/caddy/chakula_api.log
 		format json
