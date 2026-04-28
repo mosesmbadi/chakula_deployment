@@ -55,7 +55,7 @@ services:
     container_name: chakula_landing
     restart: unless-stopped
     expose:
-      - "3000"
+      - "3030:3000"
     networks:
       - chakula_net
 
