@@ -39,6 +39,7 @@ services:
     image: mosesmbadi/chakula_api:latest
     container_name: chakula_api
     restart: unless-stopped
+    entrypoint: ["sh", "./entrypoint.sh"]
     env_file:
       - .env
     # No public port — only reachable through Caddy inside chakula_net
