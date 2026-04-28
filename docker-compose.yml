@@ -49,6 +49,16 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  # ── Landing page ─────────────────────────────────────────────────────────────
+  chakula_landing:
+    image: mosesmbadi/chakula_landing:latest
+    container_name: chakula_landing
+    restart: unless-stopped
+    expose:
+      - "3000"
+    networks:
+      - chakula_net
+
   # ── Internal knowledge base (not exposed publicly) ───────────────────────────
   chakula_knowledge_base:
     image: mosesmbadi/chakula_knowledge_base:latest

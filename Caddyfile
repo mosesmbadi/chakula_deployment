@@ -3,6 +3,29 @@
 	order coraza_waf first
 }
 
+chakula.app, www.chakula.app {
+	reverse_proxy chakula_landing:3000 {
+		header_up Host {host}
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		X-XSS-Protection "1; mode=block"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	log {
+		output file /var/log/caddy/chakula_landing.log
+		format json
+	}
+}
+
 chakula-api.somastories.app {
 	# --- Coraza WAF (OWASP Core Rule Set) ---
 	coraza_waf {
