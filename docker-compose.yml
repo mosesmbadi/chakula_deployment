@@ -54,7 +54,7 @@ services:
     image: mosesmbadi/chakula_landing:latest
     container_name: chakula_landing
     restart: unless-stopped
-    expose:
+    ports:
       - "3030:3000"
     networks:
       - chakula_net
