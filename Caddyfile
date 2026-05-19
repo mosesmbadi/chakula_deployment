@@ -42,6 +42,44 @@ chakula.app, www.chakula.app {
 	}
 }
 
+securevisionrealty.com, www.securevisionrealty.com {
+	import rate_limited sv_frontend
+
+	handle /api/* {
+		reverse_proxy secure_vision_backend:8000 {
+			header_up Host {host}
+			header_up X-Real-IP {remote_host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+		}
+	}
+
+	handle /uploads/* {
+		reverse_proxy secure_vision_backend:8000 {
+			header_up Host {host}
+			header_up X-Real-IP {remote_host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+		}
+	}
+
+	handle {
+		reverse_proxy secure_vision_frontend:80 {
+			header_up Host {host}
+			header_up X-Real-IP {remote_host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+		}
+	}
+
+	import security_headers
+
+	log {
+		output file /var/log/caddy/secure_vision.log
+		format json
+	}
+}
+
 api.chakula.app {
 	import rate_limited api
 

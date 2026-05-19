@@ -81,6 +81,32 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"      
 
+  # ── Secure Vision Realty ────────────────────────────────────────────────────
+  secure_vision_backend:
+    image: mosesmbadi/secure-vision-backend:latest
+    container_name: secure_vision_backend
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=sqlite:////app/db/realty.db
+      - ADMIN_PASSWORD=${SECURE_VISION_ADMIN_PASSWORD}
+      - CORS_ORIGINS=https://securevisionrealty.com,https://www.securevisionrealty.com
+    expose:
+      - "8000"
+    volumes:
+      - secure_vision_db:/app/db
+      - secure_vision_uploads:/app/uploads
+    networks:
+      - chakula_net
+
+  secure_vision_frontend:
+    image: mosesmbadi/secure-vision-frontend:latest
+    container_name: secure_vision_frontend
+    restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - chakula_net
+
 networks:
   chakula_net:
     driver: bridge
@@ -90,3 +116,5 @@ volumes:
   caddy_config:
   caddy_logs:
   redisdata_local:
+  secure_vision_db:
+  secure_vision_uploads:
