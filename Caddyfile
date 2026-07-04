@@ -63,6 +63,15 @@ securevisionrealty.com, www.securevisionrealty.com {
 		}
 	}
 
+	handle /sitemap.xml {
+		reverse_proxy secure_vision_backend:8000 {
+			header_up Host {host}
+			header_up X-Real-IP {remote_host}
+			header_up X-Forwarded-For {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+		}
+	}
+
 	handle {
 		reverse_proxy secure_vision_frontend:80 {
 			header_up Host {host}
