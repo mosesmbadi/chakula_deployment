@@ -93,8 +93,8 @@ services:
     expose:
       - "8000"
     volumes:
-      - secure_vision_db:/app/db
-      - secure_vision_uploads:/app/uploads
+      - ./data/secure_vision/db:/app/db
+      - ./data/secure_vision/uploads:/app/uploads
     networks:
       - chakula_net
 
@@ -116,5 +116,3 @@ volumes:
   caddy_config:
   caddy_logs:
   redisdata_local:
-  secure_vision_db:
-  secure_vision_uploads:
