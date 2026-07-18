@@ -27,7 +27,7 @@ jobs:
             git pull origin main
 
             echo "→ Pulling app images from Docker Hub..."
-            docker compose pull chakula_api chakula_knowledge_base
+            docker compose pull secure_vision_backend secure_vision_frontend
 
             echo "→ Building Caddy image..."
             docker compose build caddy
