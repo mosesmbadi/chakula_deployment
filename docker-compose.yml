@@ -17,6 +17,8 @@ services:
       - caddy_logs:/var/log/caddy
     networks:
       - chakula_net
+    mem_limit: 512m
+    cpus: 1.0
 
   # ── Secure Vision Realty ────────────────────────────────────────────────────
   secure_vision_backend:
@@ -30,10 +32,12 @@ services:
     expose:
       - "8000"
     volumes:
-      - secure_vision_db:/app/db
-      - secure_vision_uploads:/app/uploads
+      - ./data/secure_vision/db:/app/db
+      - ./data/secure_vision/uploads:/app/uploads
     networks:
       - chakula_net
+    mem_limit: 512m
+    cpus: 1.0
 
   secure_vision_frontend:
     image: mosesmbadi/secure-vision-frontend:latest
@@ -43,6 +47,8 @@ services:
       - "80"
     networks:
       - chakula_net
+    mem_limit: 128m
+    cpus: 0.5
 
   # ── Imara Legacy Foundation ─────────────────────────────────────────────────
   imara_legacy_web:
@@ -62,6 +68,3 @@ volumes:
   caddy_data:
   caddy_config:
   caddy_logs:
-  redisdata_local:
-  secure_vision_db:
-  secure_vision_uploads:
