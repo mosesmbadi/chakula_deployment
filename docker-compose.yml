@@ -18,69 +18,6 @@ services:
     networks:
       - chakula_net
 
-  redis:
-    image: redis:7-alpine
-    container_name: chakula_redis_local
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redisdata_local:/data
-    networks:
-      - chakula_net
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-
-  # ── Public API ───────────────────────────────────────────────────────────────
-  chakula_api:
-    image: mosesmbadi/chakula_api:latest
-    container_name: chakula_api
-    restart: unless-stopped
-    entrypoint: ["sh", "./entrypoint.sh"]
-    env_file:
-      - .env
-    # No public port — only reachable through Caddy inside chakula_net
-    expose:
-      - "3000"
-    networks:
-      - chakula_net
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
-  # ── Landing page ─────────────────────────────────────────────────────────────
-  chakula_landing:
-    image: mosesmbadi/chakula_landing:latest
-    container_name: chakula_landing
-    restart: unless-stopped
-    ports:
-      - "3030:3000"
-    networks:
-      - chakula_net
-
-  # ── Internal knowledge base (not exposed publicly) ───────────────────────────
-  chakula_knowledge_base:
-    image: mosesmbadi/chakula_knowledge_base:latest
-    pull_policy: always
-    container_name: chakula_knowledge_base
-    restart: unless-stopped
-    env_file:
-      - .env
-    # No public port — only reachable by chakula_api inside chakula_net
-    expose:
-      - "8000"
-    healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8000/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - chakula_net
-    extra_hosts:
-      - "host.docker.internal:host-gateway"      
-
   # ── Secure Vision Realty ────────────────────────────────────────────────────
   secure_vision_backend:
     image: mosesmbadi/secure-vision-backend:latest
@@ -101,6 +38,16 @@ services:
   secure_vision_frontend:
     image: mosesmbadi/secure-vision-frontend:latest
     container_name: secure_vision_frontend
+    restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      - chakula_net
+
+  # ── Imara Legacy Foundation ─────────────────────────────────────────────────
+  imara_legacy_web:
+    image: mosesmbadi/imara-legacy-web:latest
+    container_name: imara_legacy_web
     restart: unless-stopped
     expose:
       - "80"

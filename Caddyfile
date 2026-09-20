@@ -24,24 +24,6 @@
 	}
 }
 
-chakula.app, www.chakula.app {
-	import rate_limited landing
-
-	reverse_proxy chakula_landing:3000 {
-		header_up Host {host}
-		header_up X-Real-IP {remote_host}
-		header_up X-Forwarded-For {remote_host}
-		header_up X-Forwarded-Proto {scheme}
-	}
-
-	import security_headers
-
-	log {
-		output file /var/log/caddy/chakula_landing.log
-		format json
-	}
-}
-
 securevisionrealty.com, www.securevisionrealty.com {
 	import rate_limited sv_frontend
 
@@ -89,24 +71,10 @@ securevisionrealty.com, www.securevisionrealty.com {
 	}
 }
 
-api.chakula.app {
-	import rate_limited api
+imaralegacy.org, www.imaralegacy.org {
+	import rate_limited imara
 
-	coraza_waf {
-		load_owasp_crs
-		directives `
-			Include @coraza.conf-recommended
-			Include @crs-setup.conf.example
-			Include @owasp_crs/*.conf
-			SecRuleEngine On
-			SecRequestBodyAccess On
-			SecResponseBodyAccess Off
-			SecAuditEngine RelevantOnly
-			SecAuditLog /var/log/caddy/coraza-audit.log
-		`
-	}
-
-	reverse_proxy chakula_api:3000 {
+	reverse_proxy imara_legacy_web:80 {
 		header_up Host {host}
 		header_up X-Real-IP {remote_host}
 		header_up X-Forwarded-For {remote_host}
@@ -116,7 +84,7 @@ api.chakula.app {
 	import security_headers
 
 	log {
-		output file /var/log/caddy/chakula_api.log
+		output file /var/log/caddy/imara_legacy.log
 		format json
 	}
 }
