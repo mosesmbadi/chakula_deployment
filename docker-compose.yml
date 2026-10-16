@@ -60,11 +60,96 @@ services:
     networks:
       - chakula_net
 
+  # ── Shared Postgres ─────────────────────────────────────────────────────────
+  # One server for every app; each app gets its own database and login role.
+  # Scripts in ./postgres/init run only when the data volume is first created.
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: unless-stopped
+    env_file:
+      - ./postgres.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - db_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 1g
+    cpus: 1.0
+
+  # ── AquaCheck LIMS ──────────────────────────────────────────────────────────
+  # One-shot: applies Alembic migrations, then exits. The backend waits for it.
+  aquacheck_migrations:
+    image: mosesmbadi/aquacheck-backend:latest
+    container_name: aquacheck_migrations
+    command: alembic upgrade head
+    restart: "no"
+    env_file:
+      - ./aquacheck.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - db_internal
+    mem_limit: 512m
+    cpus: 0.5
+
+  aquacheck_backend:
+    image: mosesmbadi/aquacheck-backend:latest
+    container_name: aquacheck_backend
+    restart: unless-stopped
+    # The image's default command runs with --reload. Single worker on purpose: the
+    # startup hook alters the schema and seeds data, which would race across workers.
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips="*"
+    env_file:
+      - ./aquacheck.env
+    environment:
+      - UPLOAD_DIR=/app/uploads
+      - DOCS_SOURCE_PATH=/app/docs_source
+    expose:
+      - "8000"
+    volumes:
+      - ./data/aquacheck/uploads:/app/uploads
+      - ./data/aquacheck/docs:/app/docs_source:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      aquacheck_migrations:
+        condition: service_completed_successfully
+    networks:
+      - chakula_net
+      - db_internal
+    mem_limit: 1g
+    cpus: 1.0
+
+  aquacheck_frontend:
+    image: mosesmbadi/aquacheck-frontend:latest
+    container_name: aquacheck_frontend
+    restart: unless-stopped
+    expose:
+      - "3000"
+    depends_on:
+      - aquacheck_backend
+    networks:
+      - chakula_net
+    mem_limit: 512m
+    cpus: 0.5
+
 networks:
   chakula_net:
     driver: bridge
+  # Only app backends join this, so Postgres isn't reachable from Caddy or the internet.
+  db_internal:
+    driver: bridge
+    internal: true
 
 volumes:
   caddy_data:
   caddy_config:
   caddy_logs:
+  postgres_data:

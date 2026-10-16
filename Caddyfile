@@ -87,3 +87,48 @@ imaralegacy.org, www.imaralegacy.org {
 		format json
 	}
 }
+
+lims.aquachecklab.com {
+	import rate_limited aquacheck
+
+	route {
+		coraza_waf {
+			load_owasp_crs
+			directives `
+				Include @coraza.conf-recommended
+				Include @crs-setup.conf.example
+				# CRS rule 911100 enforces tx.allowed_methods, which defaults to
+				# "GET HEAD POST OPTIONS". That blocks every update and delete in the LIMS
+				# API at the WAF — the backend never sees the request, so the 403 comes back
+				# from Caddy with an empty body and looks like a permissions failure.
+				SecAction "id:900200,phase:1,nolog,pass,t:none,setvar:'tx.allowed_methods=GET HEAD POST OPTIONS PUT PATCH DELETE'"
+				Include @owasp_crs/*.conf
+				SecRuleEngine On
+				SecRequestBodyAccess On
+				SecResponseBodyAccess On
+				SecResponseBodyMimeType text/plain text/html text/xml application/json
+				SecRequestBodyLimit 13107200
+				SecRequestBodyNoFilesLimit 131072
+			`
+		}
+
+		handle /api/* {
+			reverse_proxy aquacheck_backend:8000 {
+				header_up X-Real-IP {remote_host}
+			}
+		}
+
+		handle {
+			reverse_proxy aquacheck_frontend:3000 {
+				header_up X-Real-IP {remote_host}
+			}
+		}
+	}
+
+	import security_headers
+
+	log {
+		output file /var/log/caddy/aquacheck.log
+		format json
+	}
+}

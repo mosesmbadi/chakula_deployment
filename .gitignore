@@ -1,2 +1,4 @@
 .env
+postgres.env
+aquacheck.env
 data/
