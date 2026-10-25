@@ -21,34 +21,34 @@ services:
     cpus: 1.0
 
   # ── Secure Vision Realty ────────────────────────────────────────────────────
-  secure_vision_backend:
-    image: mosesmbadi/secure-vision-backend:latest
-    container_name: secure_vision_backend
-    restart: unless-stopped
-    environment:
-      - DATABASE_URL=sqlite:////app/db/realty.db
-      - ADMIN_PASSWORD=${SECURE_VISION_ADMIN_PASSWORD}
-      - CORS_ORIGINS=https://securevisionrealty.com,https://www.securevisionrealty.com
-    expose:
-      - "8000"
-    volumes:
-      - ./data/secure_vision/db:/app/db
-      - ./data/secure_vision/uploads:/app/uploads
-    networks:
-      - chakula_net
-    mem_limit: 512m
-    cpus: 1.0
+  # secure_vision_backend:
+  #   image: mosesmbadi/secure-vision-backend:latest
+  #   container_name: secure_vision_backend
+  #   restart: unless-stopped
+  #   environment:
+  #     - DATABASE_URL=sqlite:////app/db/realty.db
+  #     - ADMIN_PASSWORD=${SECURE_VISION_ADMIN_PASSWORD}
+  #     - CORS_ORIGINS=https://securevisionrealty.com,https://www.securevisionrealty.com
+  #   expose:
+  #     - "8000"
+  #   volumes:
+  #     - ./data/secure_vision/db:/app/db
+  #     - ./data/secure_vision/uploads:/app/uploads
+  #   networks:
+  #     - chakula_net
+  #   mem_limit: 512m
+  #   cpus: 1.0
 
-  secure_vision_frontend:
-    image: mosesmbadi/secure-vision-frontend:latest
-    container_name: secure_vision_frontend
-    restart: unless-stopped
-    expose:
-      - "80"
-    networks:
-      - chakula_net
-    mem_limit: 128m
-    cpus: 0.5
+  # secure_vision_frontend:
+  #   image: mosesmbadi/secure-vision-frontend:latest
+  #   container_name: secure_vision_frontend
+  #   restart: unless-stopped
+  #   expose:
+  #     - "80"
+  #   networks:
+  #     - chakula_net
+  #   mem_limit: 128m
+  #   cpus: 0.5
 
   # ── Imara Legacy Foundation ─────────────────────────────────────────────────
   imara_legacy_web:
