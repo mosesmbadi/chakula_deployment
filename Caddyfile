@@ -23,53 +23,6 @@
 	}
 }
 
-securevisionrealty.com, www.securevisionrealty.com {
-	import rate_limited sv_frontend
-
-	handle /api/* {
-		reverse_proxy secure_vision_backend:8000 {
-			header_up Host {host}
-			header_up X-Real-IP {remote_host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
-		}
-	}
-
-	handle /uploads/* {
-		reverse_proxy secure_vision_backend:8000 {
-			header_up Host {host}
-			header_up X-Real-IP {remote_host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
-		}
-	}
-
-	handle /sitemap.xml {
-		reverse_proxy secure_vision_backend:8000 {
-			header_up Host {host}
-			header_up X-Real-IP {remote_host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
-		}
-	}
-
-	handle {
-		reverse_proxy secure_vision_frontend:80 {
-			header_up Host {host}
-			header_up X-Real-IP {remote_host}
-			header_up X-Forwarded-For {remote_host}
-			header_up X-Forwarded-Proto {scheme}
-		}
-	}
-
-	import security_headers
-
-	log {
-		output file /var/log/caddy/secure_vision.log
-		format json
-	}
-}
-
 imaralegacy.org, www.imaralegacy.org {
 	import rate_limited imara
 
@@ -129,6 +82,37 @@ lims.aquachecklab.com {
 
 	log {
 		output file /var/log/caddy/aquacheck.log
+		format json
+	}
+}
+
+# ── Ndoto API (runs on the host as a systemd service, not in Docker) ──
+# Replace 203-0-113-10 with the server IP, dashes instead of dots.
+13.233.31.61.sslip.io {
+	# Looser than the shared snippet: mobile carriers put many users behind one IP (CGNAT).
+	rate_limit {
+		zone ndoto_api {
+			key    {remote_host}
+			events 150
+			window 10s
+		}
+	}
+
+	# Chat uses a WebSocket at /v1/ws; reverse_proxy handles the upgrade.
+	reverse_proxy host.docker.internal:8080 {
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	request_body {
+		max_size 12MB
+	}
+
+	import security_headers
+
+	log {
+		output file /var/log/caddy/ndoto_api.log
 		format json
 	}
 }
